@@ -1,4 +1,81 @@
-import { WordLen } from 'node-snap7';
+// copied from node-snap7 type declarations.
+export const enum S7ParamNumber  {
+  RemotePort = 2,
+  PingTimeout = 3,
+  SendTimeout = 4,
+  RecvTimeout = 5,
+  SrcRef = 7,
+  DstRef = 8,
+  SrcTSap = 9,
+  PDURequest = 10
+}
+
+export const S7Area = {
+  S7AreaPE: 0x81,
+  S7AreaPA: 0x82,
+  S7AreaMK: 0x83,
+  S7AreaDB: 0x84,
+  S7AreaCT: 0x1C,
+  S7AreaTM: 0x1D
+}
+
+export const enum S7WordLen {
+  S7WLBit = 0x01,
+  S7WLByte = 0x02,
+  S7WLWord = 0x04,
+  S7WLDWord = 0x06,
+  S7WLReal = 0x08,
+  S7WLCounter = 0x1C,
+  S7WLTimer = 0x1D
+}
+
+// export type S7DbVarBool = {
+//   type: 'BOOL';
+//   start: number;
+//   bit: number;
+//   value?: boolean;
+// }
+
+// export type S7DbVarBoolWrite = S7DbVarBool & {
+//   area: 'pe' | 'pa' | 'mk' | 'db' | 'ct' | 'tm';
+//   dbnr: number;
+//   value: boolean;
+// };
+
+// export type S7DbVar = S7DbVarBool & {
+//   type: //'BOOL' |
+//       'BYTE' |
+//       'WORD' |
+//       'DWORD' |
+//       'CHAR' |
+//       'INT' |
+//       'DINT' |
+//       'REAL';
+//   dbnr?: number;
+//   area?: 'pe' | 'pa' | 'mk' | 'db' | 'ct' | 'tm';
+//   start: number;
+//   value: number | string;
+// }
+
+// export type S7DbVarWrite = S7DbVarBoolWrite | (S7DbVar & {
+//   area: 'pe' | 'pa' | 'mk' | 'db' | 'ct' | 'tm';
+//   dbnr: number;
+//   value: number | string;
+// })
+
+export type S7DbVarAreaDbRead = {
+  type: 'BOOL' |
+        'BYTE' |
+        'WORD' |
+        'DWORD' |
+        'CHAR' |
+        'INT' |
+        'DINT' |
+        'REAL';
+    start: number;
+    bit?: number;
+    value?: boolean | number | string;
+}
 
 export type S7DbVarType = {
     type: 'BOOL' |
@@ -12,8 +89,8 @@ export type S7DbVarType = {
     dbnr: number;
     area: 'pe' | 'pa' | 'mk' | 'db' | 'ct' | 'tm';
     start: number;
-    bit: number;
-    value: boolean | number | string;
+    bit?: number;
+    value?: boolean | number | string;
 }
 
 export type S7ParserType = (
@@ -28,7 +105,7 @@ export type S7ClientDatatype = {
     bytes: number,
     parser: S7ParserType,
     formatter: S7FormatterType,
-    S7WordLen: WordLen,
+    S7WordLen: S7WordLen,
 };
 
 type BufferReadFnName = 
@@ -61,7 +138,7 @@ type BufferWriteFnName =
 function _gen(
     bytes: number, 
     bFn: string,
-    S7WordLen: WordLen
+    S7WordLen: S7WordLen
 ): S7ClientDatatype {
   return {
     bytes,
@@ -91,26 +168,26 @@ export const Datatypes = {
     bytes: 1,
     parser: (buffer: Buffer, offset = 0, bit = 0) : boolean => (+buffer.readUInt8(offset) >> bit & 1 )=== 1,
     formatter: (v: boolean): Buffer => Buffer.from([v ? 0x01 : 0x00]),
-    S7WordLen: WordLen.S7WLBit
+    S7WordLen: S7WordLen.S7WLBit
   },
 
   /**
    * BYTE
    * @type {S7ClientDatatype}
    */
-  BYTE: _gen(1, 'UInt8', WordLen.S7WLByte),
+  BYTE: _gen(1, 'UInt8', S7WordLen.S7WLByte),
 
   /**
    * WORD
    * @type {S7ClientDatatype}
    */
-  WORD: _gen(2, 'UInt16BE', WordLen.S7WLWord),
+  WORD: _gen(2, 'UInt16BE', S7WordLen.S7WLWord),
 
   /**
    * DWORD
    * @type {S7ClientDatatype}
    */
-  DWORD: _gen(4, 'UInt32BE', WordLen.S7WLDWord),
+  DWORD: _gen(4, 'UInt32BE', S7WordLen.S7WLDWord),
 
   /**
    * CHAR
@@ -120,24 +197,24 @@ export const Datatypes = {
     bytes: 1,
     parser: (buffer: Buffer, offset = 0): string => buffer.toString('ascii', offset, offset + 1),
     formatter: (v: string): Buffer => Buffer.from(v, 'ascii'),
-    S7WordLen: WordLen.S7WLByte
+    S7WordLen: S7WordLen.S7WLByte
   },
 
   /**
    * INT
    * @type {S7ClientDatatype}
    */
-  INT: _gen(2, 'Int16BE', WordLen.S7WLWord),
+  INT: _gen(2, 'Int16BE', S7WordLen.S7WLWord),
 
   /**
    * DINT
    * @type {S7ClientDatatype}
    */
-  DINT: _gen(4, 'Int32BE', WordLen.S7WLDWord),
+  DINT: _gen(4, 'Int32BE', S7WordLen.S7WLDWord),
 
   /**
    * REAL
    * @type {S7ClientDatatype}
    */
-  REAL: _gen(4, 'FloatBE', WordLen.S7WLReal),
+  REAL: _gen(4, 'FloatBE', S7WordLen.S7WLReal),
 };

@@ -1,9 +1,16 @@
-import snap7, { S7Client as NodeS7Client, ParamNumber, MultiVarRead, Area, MultiVarWrite } from 'node-snap7';
+import snap7, {
+  S7Client as NodeS7Client,
+  MultiVarRead,
+  MultiVarWrite,
+  ParamNumber,
+  Area,
+  WordLen,
+} from 'node-snap7';
 import EventEmitter from 'events';
 import { isIPv4 } from 'net';
 import dns from 'dns';
 import random from 'lodash.random';
-import { Datatypes, S7DbVarType, S7FormatterType } from './datatypes';
+import { Datatypes, S7DbVarType, S7DbVarAreaDbRead, S7FormatterType, S7ParamNumber, S7Area } from './datatypes';
 
 export * from './datatypes';
 
@@ -67,7 +74,7 @@ export class S7Client extends EventEmitter {
     Object.assign(this.opts, options || {});
 
     this.client = new snap7.S7Client();
-    this.client.SetParam(ParamNumber.RemotePort, this.opts.port);
+    this.client.SetParam(S7ParamNumber.RemotePort as unknown as ParamNumber, this.opts.port); // TODO: fix me.
   }
 
   /**
@@ -207,7 +214,7 @@ export class S7Client extends EventEmitter {
    * @param {Datatype} vars[].type - Data type (BYTE, WORD, INT, etc), see {@link /s7client/?api=Datatypes|Datatypes}
    * @returns {Promise} - Resolves to the vars array with populate *value* property
    */
-  async readDB(DBNr: number, vars: S7DbVarType[]): Promise<S7DbVarType[]> {
+  async readDB(DBNr: number, vars: S7DbVarAreaDbRead[]): Promise<S7DbVarAreaDbRead[]> {
     return new Promise((resolve, reject) => {
       if(vars.length === 0) return resolve([]);
 
@@ -241,16 +248,16 @@ export class S7Client extends EventEmitter {
    * @param {int} [vars[].dbnr] - DB Nr if read from area=db
    * @returns {Promise} - Resolves to the vars array with populate *value* property
    */
-  async readVars(vars: S7DbVarType[]) : Promise<Array<S7DbVarType & { value: boolean | string | number }>>  {
+  async readVars(vars: S7DbVarType[]) : Promise<Array<S7DbVarType>>  {
     return new Promise((resolve, reject) => {
       debug(`${this.opts.name}: ReadMultiVars: ${JSON.stringify(vars)}`);
       const toRead: MultiVarRead[] = vars.map(v => {
-        const areaKey: keyof typeof Area  = 'S7Area' + v.area.toUpperCase() as keyof typeof Area;
+        const areaKey: keyof typeof S7Area  = 'S7Area' + v.area.toUpperCase() as keyof typeof S7Area;
         return {
-          Area: Area[areaKey],
-          WordLen: Datatypes[v.type].S7WordLen,
+          Area: S7Area[areaKey] as Area,
+          WordLen: Datatypes[v.type].S7WordLen as unknown as WordLen,
           DBNumber: v.dbnr,
-          Start: v.type === 'BOOL' ? v.start * 8 + v.bit : v.start,
+          Start: v.type === 'BOOL' ? v.start * 8 + (v.bit as number) : v.start,
           Amount: 1
         }
       });
@@ -284,14 +291,14 @@ export class S7Client extends EventEmitter {
   async writeVars(vars: S7DbVarType[]): Promise<S7DbVarType[]> {
     debug(`${this.opts.name}: WriteMultiVars: ${JSON.stringify(vars)}`);
     const toWrite: MultiVarWrite[]= vars.map(v => {
-        const areaKey: keyof typeof Area  = 'S7Area' + v.area.toUpperCase() as keyof typeof Area;
+        const areaKey: keyof typeof S7Area  = 'S7Area' + v.area.toUpperCase() as keyof typeof S7Area;
         return ({
-        Area: Area[areaKey],
-        WordLen: Datatypes[v.type].S7WordLen,
+        Area: S7Area[areaKey] as Area,
+        WordLen: Datatypes[v.type].S7WordLen as unknown as WordLen,
         DBNumber: v.dbnr,
-        Start: v.type === 'BOOL' ? v.start * 8 + v.bit : v.start,
+        Start: v.type === 'BOOL' ? v.start * 8 + (v.bit as number) : v.start,
         Amount: 1,
-        Data: (Datatypes[v.type].formatter as S7FormatterType)(v.value) // TODO fix me
+        Data: (Datatypes[v.type].formatter as S7FormatterType)(v.value as boolean | number | string) // TODO fix me
         })
     });
 
@@ -320,7 +327,7 @@ export class S7Client extends EventEmitter {
    * @param {int} [v.bit] - Position of the bit in the byte
    * @returns {Promise} - Resolves to the var obj with populate *value* property
    */
-  async readVar(v: S7DbVarType): Promise<S7DbVarType & { value: boolean | string | number }> {
+  async readVar(v: S7DbVarType): Promise<S7DbVarType> {
     if(v.area === 'db' && !v.dbnr) throw new Error(`Param dbnr is mandatory for area=db`);
     return this.readVars([v])
       .then(r => r[0]);
