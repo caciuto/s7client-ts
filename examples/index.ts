@@ -2,9 +2,9 @@ import { S7Client, S7DbVarAreaDbRead } from '../src';
 
 // PLC Connection Settings
 const plcSettings = {
-  name: "TEST MASTER",
-  host: '10.2.1.66',
-  port: 102,
+  name: "Local PLC",
+  host: 'localhost',
+  port: 9102,
   rack: 0,
   slot: 1
 };
@@ -30,39 +30,21 @@ client.on('error', console.error);
   console.log(res);
 
   // Write multiple Vars
-  // goMaintenance
-  // await client.writeVars([
-  //   {
-  //     area: 'db', dbnr: 100, type: 'INT',
-  //     start: 2,
-  //     value: 11
-  //   }, {
-  //     area: 'db', dbnr: 100, type: 'INT',
-  //     start: 4,
-  //     value: 2
-  //   }, {
-  //     area: 'db', dbnr: 100, type: 'BOOL',
-  //     start: 0, bit: 0,
-  //     value: true
-  //   }
-  // ]);
-
-  // goHome
-  // await client.writeVars([
-  //   {
-  //     area: 'db', dbnr: 100, type: 'INT',
-  //     start: 2,
-  //     value: 10
-  //   }, {
-  //     area: 'db', dbnr: 100, type: 'INT',
-  //     start: 4,
-  //     value: 1
-  //   }, {
-  //     area: 'db', dbnr: 100, type: 'BOOL',
-  //     start: 0, bit: 0,
-  //     value: true
-  //   }
-  // ]);
+  await client.writeVars([
+    {
+      area: 'db', dbnr: 100, type: 'INT',
+      start: 2,
+      value: 11
+    }, {
+      area: 'db', dbnr: 100, type: 'INT',
+      start: 4,
+      value: 2
+    }, {
+      area: 'db', dbnr: 100, type: 'BOOL',
+      start: 0, bit: 0,
+      value: true
+    }
+  ]);
 
   client.disconnect();
 })();

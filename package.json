@@ -1,7 +1,7 @@
 {
   "name": "s7client-ts",
   "version": "0.0.1",
-  "description": "Step7 client based on node-s7client s7client, Typescript ready",
+  "description": "Step7 client based on node-step7 and inspired by s7client, Typescript ready",
   "keywords": [
     "step7",
     "s7",

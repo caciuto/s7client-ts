@@ -73,6 +73,7 @@ export type S7DbVarAreaDbRead = {
         'DINT' |
         'REAL';
     start: number;
+    name?: string;
     bit?: number;
     value?: boolean | number | string;
 }
@@ -88,6 +89,7 @@ export type S7DbVarType = {
         'REAL';
     dbnr: number;
     area: 'pe' | 'pa' | 'mk' | 'db' | 'ct' | 'tm';
+    name?: string;
     start: number;
     bit?: number;
     value?: boolean | number | string;
