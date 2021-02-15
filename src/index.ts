@@ -9,12 +9,13 @@ import snap7, {
 import EventEmitter from 'events';
 import { isIPv4 } from 'net';
 import dns from 'dns';
+import { debuglog } from 'util';
 import random from 'lodash.random';
 import { Datatypes, S7DbVarType, S7DbVarAreaDbRead, S7FormatterType, S7ParamNumber, S7Area } from './datatypes';
 
 export * from './datatypes';
 
-const debug = (things: string) => console.log('[S7Client]', things);
+const debug = debuglog("S7Client");
 
 
 export type S7ClientOptions = {
